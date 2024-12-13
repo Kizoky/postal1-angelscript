@@ -48,6 +48,7 @@
 #include "BLUE/Blue.h"
 
 SDL_Window *sdlWindow = NULL;
+SDL_Renderer* sdlRenderer = NULL; // Made it extern-able - Kizoky
 SDL_Surface *sdlShadowSurface = NULL;
 
 bool mouse_grabbed = false;
@@ -133,6 +134,13 @@ extern void rspDoSystem(void)										// Returns nothing.
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+            // If holding down the DELETE button, then make imgui appear - Kizoky
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_DELETE)
+            {
+                extern void ShowImgui();
+                ShowImgui();
+            }
+
             switch (event.type)
             {
                 //case SDL_MOUSEMOTION:
