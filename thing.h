@@ -274,6 +274,8 @@
 #include "sprites.h"
 #include "smash.h"
 
+#include "as_main.h"
+
 // Forward declaration of class to avoid recursive depency of include files
 class CRealm;
 class CSmash;
@@ -815,6 +817,12 @@ class CThing
 			ASSERT(0);
 			return 0;
 			}
+
+		public:
+			asIScriptObject* GetASObject() { return m_pASObj; }
+
+		protected:
+			asIScriptObject* m_pASObj;
 
 	};
 

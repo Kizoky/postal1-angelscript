@@ -963,7 +963,7 @@ extern void TheGame(void)
 	{
 
 	// Setup AngelScript for the first time - Kizoky
-	g_AngelScript.Setup(false);
+	//g_AngelScript.Setup(false);
 
 	short sResult = 0;
 

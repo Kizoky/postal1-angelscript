@@ -85,6 +85,8 @@
     <ClInclude Include="angelscript\add_on\scripthandle\scripthandle.h" />
     <ClInclude Include="angelscript\add_on\scriptstdstring\scriptstdstring.h" />
     <ClInclude Include="angelscript\add_on\weakref\weakref.h" />
+    <ClInclude Include="angelscript\add_on\contextmgr\contextmgr.h" />
+    <ClInclude Include="angelscript\add_on\debugger\debugger.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aivars.cpp" />
@@ -114,6 +116,13 @@
     <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring.cpp" />
     <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring_utils.cpp" />
     <ClCompile Include="angelscript\add_on\weakref\weakref.cpp" />
+    <ClCompile Include="angelscript\as_register_ccharacter.cpp" />
+    <ClCompile Include="angelscript\add_on\contextmgr\contextmgr.cpp" />
+    <ClCompile Include="angelscript\add_on\debugger\debugger.cpp" />
+    <ClCompile Include="angelscript\as_register_cthing.cpp" />
+    <ClCompile Include="angelscript\as_register_cthing3d.cpp" />
+    <ClCompile Include="angelscript\as_register_cdoofus.cpp" />
+    <ClCompile Include="angelscript\as_register_global.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Postal Plus.txt" />
