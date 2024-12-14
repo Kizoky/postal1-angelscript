@@ -76,6 +76,15 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="imgui\backends\imgui_impl_sdl2.h" />
     <ClInclude Include="imgui\backends\imgui_impl_sdlrenderer2.h" />
+    <ClInclude Include="as_main.h" />
+    <ClInclude Include="angelscript\angelscript.h" />
+    <ClInclude Include="angelscript\add_on\scriptany\scriptany.h" />
+    <ClInclude Include="angelscript\add_on\scriptarray\scriptarray.h" />
+    <ClInclude Include="angelscript\add_on\scriptbuilder\scriptbuilder.h" />
+    <ClInclude Include="angelscript\add_on\scriptdictionary\scriptdictionary.h" />
+    <ClInclude Include="angelscript\add_on\scripthandle\scripthandle.h" />
+    <ClInclude Include="angelscript\add_on\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="angelscript\add_on\weakref\weakref.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aivars.cpp" />
@@ -96,6 +105,15 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_sdl2.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_sdlrenderer2.cpp" />
+    <ClCompile Include="as_main.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptarray\scriptarray.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptany\scriptany.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptbuilder\scriptbuilder.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptdictionary\scriptdictionary.cpp" />
+    <ClCompile Include="angelscript\add_on\scripthandle\scripthandle.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring_utils.cpp" />
+    <ClCompile Include="angelscript\add_on\weakref\weakref.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Postal Plus.txt" />

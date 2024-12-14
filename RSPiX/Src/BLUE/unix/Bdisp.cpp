@@ -37,6 +37,8 @@
 #include "imgui/backends/imgui_impl_sdl2.h"
 #include "imgui/backends/imgui_impl_sdlrenderer2.h"
 
+#include "as_main.h"
+
 extern SDL_Window *sdlWindow;
 static char *sdlAppName;
 extern SDL_Renderer *sdlRenderer; // Extern - Kizoky
@@ -47,6 +49,27 @@ static int FramebufferWidth = 0;
 static int FramebufferHeight = 0;
 static Uint32 *TexturePointer = NULL;
 static Uint8 *PalettedTexturePointer = NULL;
+
+// Some global booleans to check the state - Kizoky
+static bool imgui_shown = false;
+static bool imgui_up = false;
+
+class CImguiHelper
+{
+public:
+	int CreateImgui();
+
+	void Enable()
+	{
+		CreateImgui();
+	}
+
+	void Disable()
+	{
+		// Cleans up automatically
+		imgui_shown = false;
+	}
+};
 
 // ImGui - Kizoky
 CImguiHelper* imgui = nullptr;
@@ -828,10 +851,6 @@ extern void rspCacheDirtyRect(
 {
 }
 
-// Some global booleans to check the state - Kizoky
-static bool imgui_shown = false;
-static bool imgui_up = false;
-
 // Called from rspDoSystem, since it already has key input handling - Kizoky
 void ShowImgui()
 {
@@ -839,7 +858,7 @@ void ShowImgui()
 }
 
 // Main loop of ImGui for AngelScript debugging - Kizoky
-int CreateImgui()
+int CImguiHelper::CreateImgui()
 {
 	if (!imgui_shown)
 	{
@@ -898,9 +917,50 @@ int CreateImgui()
 
 		// ImGui overlay
 		ImGui::SetNextWindowBgAlpha(0.5f);
-		ImGui::Begin("AngelScript Debugger", &imgui_shown, /*ImGuiWindowFlags_NoDecoration |*/ ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::Text("Nothing works here... yet...");
-			ImGui::SliderFloat("Example Slider", &io.Framerate, 0.0f, 120.0f, "%.1f FPS");
+		ImGui::Begin("Engine", &imgui_shown, /*ImGuiWindowFlags_NoDecoration |*/ ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::Text("Enum count: %d", (int)g_AngelScript.GetEngine()->GetEnumCount());
+			ImGui::Text("Funcdef count: %d", (int)g_AngelScript.GetEngine()->GetFuncdefCount());
+			ImGui::Text("Global function count: %d", (int)g_AngelScript.GetEngine()->GetGlobalFunctionCount());
+			ImGui::Text("Global property count: %d", (int)g_AngelScript.GetEngine()->GetGlobalPropertyCount());
+			ImGui::Text("Module count: %d", (int)g_AngelScript.GetEngine()->GetModuleCount());
+			ImGui::Text("Typedef count: %d", (int)g_AngelScript.GetEngine()->GetTypedefCount());
+			//ImGui::SliderFloat("Example Slider", &io.Framerate, 0.0f, 120.0f, "%.1f FPS");
+		ImGui::End();
+
+		if (g_AngelScript.GetModule())
+		{
+			ImGui::Begin("Module", &imgui_shown, /*ImGuiWindowFlags_NoDecoration |*/ ImGuiWindowFlags_AlwaysAutoResize);
+				ImGui::Text("Default namespace: '%s'", g_AngelScript.GetModule()->GetDefaultNamespace());
+				ImGui::Text("Enum count: %d", (int)g_AngelScript.GetModule()->GetEnumCount());
+				ImGui::Text("Function count: %d", (int)g_AngelScript.GetModule()->GetFunctionCount());
+				ImGui::Text("Var count: %d", (int)g_AngelScript.GetModule()->GetGlobalVarCount());
+				ImGui::Text("Imported function count: %d", (int)g_AngelScript.GetModule()->GetImportedFunctionCount());
+				ImGui::Text("Name: '%s'", g_AngelScript.GetModule()->GetName());
+				ImGui::Text("Object count: %d", (int)g_AngelScript.GetModule()->GetObjectTypeCount());
+				ImGui::Text("Typedef count: %d", (int)g_AngelScript.GetModule()->GetTypedefCount());
+				//ImGui::SliderFloat("Example Slider", &io.Framerate, 0.0f, 120.0f, "%.1f FPS");
+				if (ImGui::Button("Recompile (main menu only)"))
+				{
+					g_AngelScript.Recompile();
+				}
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::Begin("Module (error)", &imgui_shown, /*ImGuiWindowFlags_NoDecoration |*/ ImGuiWindowFlags_AlwaysAutoResize);
+				ImGui::Text("error");
+			ImGui::End();
+		}
+
+		ImGui::Begin("Console", &imgui_shown, /*ImGuiWindowFlags_NoDecoration |*/ ImGuiWindowFlags_AlwaysAutoResize);
+			for (int i = 0; i < g_AngelScript.GetLog().size(); i++)
+			{
+				ImGui::Text("(%d) %s", i, g_AngelScript.GetLog()[i].c_str());
+			}
+			if (ImGui::Button("Clear log"))
+			{
+				g_AngelScript.ClearLog();
+			}
 		ImGui::End();
 
 		// Rendering
@@ -920,21 +980,6 @@ int CreateImgui()
 
 	return 0;
 }
-
-class CImguiHelper
-{
-public:
-	void Enable()
-	{
-		CreateImgui();
-	}
-
-	void Disable()
-	{
-		// Cleans up automatically
-		imgui_shown = false;
-	}
-};
 
 extern void rspPresentFrame(void)
 {

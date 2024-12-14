@@ -585,6 +585,9 @@
 
 #include "CompileOptions.h"
 
+// AngelScript - Kizoky
+#include "as_main.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Macros/types/etc.
 ////////////////////////////////////////////////////////////////////////////////
@@ -958,6 +961,10 @@ static void EnumExistingSaveGames(Menu *menu)
 ////////////////////////////////////////////////////////////////////////////////
 extern void TheGame(void)
 	{
+
+	// Setup AngelScript for the first time - Kizoky
+	g_AngelScript.Setup(false);
+
 	short sResult = 0;
 
 	// Set up callbacks for when OS sends us to foreground or background.

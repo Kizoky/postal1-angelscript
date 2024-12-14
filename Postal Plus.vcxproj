@@ -100,7 +100,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\SDL2\include;.\RSPiX\Src;.\RSPiX\Src\Blue;.\RSPiX\Inc;.\steamworks\sdk\public;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\angelscript;.\SDL2\include;.\RSPiX\Src;.\RSPiX\Src\Blue;.\RSPiX\Inc;.\steamworks\sdk\public;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;NOSHMALLOC;TRACENASSERT;WIN32;_WINDOWS;LOCALE=US;TARGET=POSTAL_2015;WITH_STEAMWORKS=0;ALLOW_TWINSTICK;DEBUG_LEVEL_CHEAT;RSP_DEBUG_OUT_FILE;RSP_TRACE_LOG_NAME="Postal.log";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader />
@@ -120,10 +120,10 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;WSock32.lib;WinMM.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;WSock32.lib;WinMM.lib;SDL2.lib;SDL2main.lib;angelscriptd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Testing\PostalD.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\SDL2\libs\win32;.\steamworks\sdk\redistributable_bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\SDL2\libs\win32;.\steamworks\sdk\redistributable_bin;.\angelscript\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Build\Postal Plus\Debug/Postal PlusD.pdb</ProgramDatabaseFile>
@@ -143,7 +143,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>.\SDL2\include;.\RSPiX\Src;.\RSPiX\Src\Blue;.\RSPiX\Inc;.\steamworks\sdk\public;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\SDL2\include;.\RSPiX\Src;.\RSPiX\Src\Blue;.\RSPiX\Inc;.\steamworks\sdk\public;.;.\angelscript;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;LOCALE=US;TARGET=POSTAL_2015;WITH_STEAMWORKS=0;ALLOW_TWINSTICK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -165,7 +165,7 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;WSock32.lib;WinMM.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\testing\Postal.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\SDL2\libs\win32;.\steamworks\sdk\redistributable_bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\SDL2\libs\win32;.\steamworks\sdk\redistributable_bin;.\angelscript\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ProgramDatabaseFile>.\Build\Postal Plus\Release/Postal Plus.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -274,6 +274,15 @@
     <Image Include="res\teeth.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="angelscript\add_on\scriptany\scriptany.h" />
+    <ClInclude Include="angelscript\add_on\scriptarray\scriptarray.h" />
+    <ClInclude Include="angelscript\add_on\scriptbuilder\scriptbuilder.h" />
+    <ClInclude Include="angelscript\add_on\scriptdictionary\scriptdictionary.h" />
+    <ClInclude Include="angelscript\add_on\scripthandle\scripthandle.h" />
+    <ClInclude Include="angelscript\add_on\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="angelscript\add_on\weakref\weakref.h" />
+    <ClInclude Include="angelscript\angelscript.h" />
+    <ClInclude Include="as_main.h" />
     <ClInclude Include="band.h" />
     <ClInclude Include="credits.h" />
     <ClInclude Include="game.h" />
@@ -306,6 +315,15 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">RSPiX.H</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release(DebugLog)|Win32'">RSPiX.H</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="angelscript\add_on\scriptany\scriptany.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptarray\scriptarray.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptbuilder\scriptbuilder.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptdictionary\scriptdictionary.cpp" />
+    <ClCompile Include="angelscript\add_on\scripthandle\scripthandle.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring.cpp" />
+    <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring_utils.cpp" />
+    <ClCompile Include="angelscript\add_on\weakref\weakref.cpp" />
+    <ClCompile Include="as_main.cpp" />
     <ClCompile Include="band.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
