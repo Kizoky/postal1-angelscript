@@ -410,55 +410,8 @@ CThing::CThing(
 	m_phot				= NULL;
 
 	// Add an AngelScript obj - Kizoky
-	asIScriptContext* ctx = g_AngelScript.GetEngine()->CreateContext();
-
-	asITypeInfo* type = g_AngelScript.GetModule()->GetTypeInfoByDecl("CPostalThing");
-	if (type == 0)
-	{
-		g_AngelScript.AddLog("Failed to get CPostalThing");
-		return;
-	}
-
-	asIScriptObject* obj = 0;
-
-	char objbuffer[256];
-	_snprintf(objbuffer, sizeof(objbuffer), "CPostalThing@ CPostalThing(CThing obj, int id)");
-
-	// Get the factory function from the object type
-	asIScriptFunction* factory = type->GetFactoryByDecl(objbuffer);
-	if (!factory)
-	{
-		g_AngelScript.AddLog("Failed to factory CPostalThing");
-		return;
-	}
-
-	// Prepare the context to call the factory function
-	ctx->Prepare(factory);
-
-	ctx->SetArgObject(0, this);
-	ctx->SetArgDWord(1, id);
-
-	// Execute the call
-	ctx->Execute();
-
-	// Get the object that was created
-	obj = *(asIScriptObject**)ctx->GetAddressOfReturnValue();
-
-	if (!obj)
-	{
-		ctx->Release();
-		factory->Release();
-		type->Release();
-
-		g_AngelScript.AddLog("No obj was created from CPostalThing");
-		return;
-	}
-
-	// If you're going to store the object you must increase the reference,
-	// otherwise it will be destroyed when the context is reused or destroyed.
-	obj->AddRef();
-
-	m_pASObj = obj;
+	m_pASObj = g_AngelScript.CreateObj("CPostalThing", this, id);
+	g_AngelScript.AddObjToCache(GetASObject(), this);
 	}
 
 
@@ -467,15 +420,14 @@ CThing::CThing(
 ////////////////////////////////////////////////////////////////////////////////
 CThing::~CThing()
 	{
+	g_AngelScript.RemoveFromCache(GetASObject(), this);
+
 	// Remove this object from realm
 //	m_pRealm->RemoveThing(m_id, m_iterEvery, m_iterClass);
 	m_pRealm->RemoveThing(this);
 	
 	// Release this fellow's ID.
 	m_pRealm->m_idbank.Release(m_u16InstanceId);
-
-	if (m_pASObj)
-		m_pASObj->Release();
 	}
 
 ////////////////////////////////////////////////////////////////////////////////

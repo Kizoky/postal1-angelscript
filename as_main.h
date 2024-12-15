@@ -7,6 +7,9 @@
 #include <vector>
 #include "assert.h"
 
+#include "thing.h"
+//#include "realm.h"
+
 // Only for dumping information!
 
 struct ASGlobalFunctions_t { int index; };
@@ -19,6 +22,12 @@ struct ASObjects_t
 struct ASProperties_t { int index; };
 struct ASBehaviors_t { int index; };
 struct ASGlobalProperties_t { int index; };
+
+struct ASCachedObj_t
+{
+	asIScriptObject* obj;
+	CThing* thing;
+};
 
 // Unique identifiers for debugging/misc.
 enum
@@ -67,13 +76,28 @@ enum
 
 };
 
+enum
+{
+	LOG_NONE,
+	LOG_SCRIPT, // Called by scripts
+
+	LOG_CALLBACK,
+	LOG_MAIN,
+	LOG_COMPILE,
+
+	LOG_OBJ_CONSTRUCT,
+	LOG_OBJ_DESTRUCT,
+	LOG_OBJ_FAIL
+};
+
+//class CRealm;
+
 class CAngelScriptVM
 {
 public:
 	CAngelScriptVM();
 	CAngelScriptVM(bool boot);
 	int Setup(bool bRecompile);
-	void AddLog(const char* str, ...);
 
 public:
 	// Global functions
@@ -94,16 +118,23 @@ public:
 	asIScriptEngine* GetEngine() { return engine; }
 	asIScriptModule* GetModule() { return mod; }
 
-	std::vector<std::string> GetLog() { return log; }
-	void ClearLog() { log.clear(); }
-
 	void Recompile();
 
+public:
+	asIScriptObject* CreateObj(std::string Class, CThing* thing, int id);
+	void AddObjToCache(asIScriptObject* obj, CThing* thing);
+	asIScriptObject* GetObjFromCache(CThing* thing);
+	CThing* GetThingFromCache(asIScriptObject* obj);
+	bool RemoveFromCache(asIScriptObject* obj, CThing* thing);
+
+	//CRealm* GetRealm();
 private:
 	asIScriptEngine* engine;
 	asIScriptModule* mod;
 
-	std::vector<std::string> log;
+public:
+	// Cached objects, destroyed on destruct
+	std::vector<ASCachedObj_t> m_ASObjs;
 
 public:
 	// Contains the indexes of all Global functions registered
@@ -116,6 +147,25 @@ public:
 	std::vector< ASBehaviors_t > m_ASBehaviors;
 	// Contains the indexes of all global properties registered
 	std::vector< ASGlobalProperties_t > m_ASGlobalProperties;
+public:
+	void AddLog(int logType, const char* str, ...);
+
+	std::vector<std::string> GetLog() { return log; }
+	void ClearLog() { log.clear(); }
+
+	// Logs, console
+	std::vector<std::string> log;
+
+	bool bLogNone;
+	bool bLogScript;
+
+	bool bLogCallback;
+	bool bLogMain;
+	bool bLogCompile;
+
+	bool bLogObjConstr;
+	bool bLogObjDestr;
+	bool bLogObjFail;
 };
 
 extern void DumpGlobalFunction(int index);
@@ -127,6 +177,7 @@ extern void DumpInterface(int index);
 
 // Accessor
 extern CAngelScriptVM g_AngelScript;
+extern std::string g_loaderPath;
 
 // Registers an object. Normally in Script this will be name@
 // Recommended to use this macro if object won't be a variable like Vector, QAngle, etc..

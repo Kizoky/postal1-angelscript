@@ -145,16 +145,41 @@ std::string GetCurrentDir()
 	return fullpath.substr(0, pos); // Return the path up to the last slash
 }
 
-static std::string g_loaderPath;
+std::string g_loaderPath;
 
 CAngelScriptVM::CAngelScriptVM(bool boot)
 {
+	// Logging
+	bLogNone = true;
+	bLogScript = true;
+	bLogCallback = true;
+	bLogMain = true;
+	bLogCompile = true;
+
+	bLogObjConstr = false;
+	bLogObjDestr = false;
+	bLogObjFail = true;
+
 	g_loaderPath = GetCurrentDir() + std::string("/scripts/angelscript.txt");
 	Setup(false);
 }
 
-void CAngelScriptVM::AddLog(const char* str, ...)
+void CAngelScriptVM::AddLog(int logType, const char* str, ...)
 {
+	switch (logType)
+	{
+		case LOG_NONE: { if (!bLogNone) return; break; }
+		case LOG_SCRIPT: { if (!bLogScript) return; break; }
+
+		case LOG_CALLBACK: { if (!bLogCallback) return; break; }
+		case LOG_MAIN: { if (!bLogMain) return; break; }
+		case LOG_COMPILE: { if (!bLogCompile) return; break; }
+
+		case LOG_OBJ_CONSTRUCT: { if (!bLogObjConstr) return; break; }
+		case LOG_OBJ_DESTRUCT: { if (!bLogObjDestr) return; break; }
+		case LOG_OBJ_FAIL: { if (!bLogObjFail) return; break; }
+	}
+
 	va_list		argptr;
 	char		string[1024];
 	va_start(argptr, str);
@@ -179,7 +204,7 @@ void MessageCallback(const asSMessageInfo* msg, void* param)
 		type = "INFO";
 	}
 
-	g_AngelScript.AddLog("%s (L: %d) : %s : %s", msg->section, msg->row, type, msg->message);
+	g_AngelScript.AddLog(LOG_CALLBACK, "%s (L: %d) : %s : %s", msg->section, msg->row, type, msg->message);
 }
 
 // 1 == success
@@ -187,7 +212,7 @@ void MessageCallback(const asSMessageInfo* msg, void* param)
 // -1 == catastrophic
 int CAngelScriptVM::Setup(bool bRecompile)
 {
-	g_AngelScript.AddLog("Setting up AngelScript %s", ANGELSCRIPT_VERSION_STRING);
+	g_AngelScript.AddLog(LOG_MAIN, "Setting up AngelScript %s", ANGELSCRIPT_VERSION_STRING);
 
 	int r = 0;
 
@@ -245,7 +270,7 @@ int CAngelScriptVM::Setup(bool bRecompile)
 		r = builder.AddSectionFromFile(g_loaderPath.c_str());
 	else
 	{
-		g_AngelScript.AddLog("Invalid/missing path for loader: '%s'", g_loaderPath.c_str());
+		g_AngelScript.AddLog(LOG_COMPILE, "Invalid/missing path for loader: '%s'", g_loaderPath.c_str());
 		return 0;
 	}
 
@@ -254,19 +279,19 @@ int CAngelScriptVM::Setup(bool bRecompile)
 		r = builder.BuildModule();
 		if (r >= 0)
 		{
-			g_AngelScript.AddLog("Successfully built module for '%s'", g_loaderPath.c_str());
+			g_AngelScript.AddLog(LOG_COMPILE, "Successfully built module for '%s'", g_loaderPath.c_str());
 			return 1;
 		}
 		else
 		{
-			g_AngelScript.AddLog("There were errors in building for '%s'", g_loaderPath.c_str());
+			g_AngelScript.AddLog(LOG_COMPILE, "There were errors in building for '%s'", g_loaderPath.c_str());
 			return 0;
 		}
 	}
 	else
 	{
 		// does it even reach here? Probably not
-		g_AngelScript.AddLog("There were errors in building...");
+		g_AngelScript.AddLog(LOG_COMPILE, "There were errors in building...");
 		return 0;
 	}
 
@@ -280,3 +305,156 @@ void CAngelScriptVM::Recompile()
 	g_AngelScript.ClearLog();
 	Setup(true);
 }
+
+asIScriptObject* CAngelScriptVM::CreateObj(std::string Class, CThing* thing, int id)
+{
+	asIScriptObject* obj = NULL;
+	obj = GetObjFromCache(thing);
+	// This probably never happens but better safe than sorry
+	if (obj)
+	{
+		return obj;
+	}
+
+	// Add an AngelScript obj - Kizoky
+	asIScriptContext* ctx = g_AngelScript.GetEngine()->CreateContext();
+	if (ctx == NULL)
+	{
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to create context for '%s'", Class.c_str());
+		return NULL;
+	}
+
+	asITypeInfo* type = g_AngelScript.GetModule()->GetTypeInfoByDecl(Class.c_str());
+	if (type == NULL)
+	{
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to get type for '%s'", Class.c_str());
+		ctx->Release();
+		return NULL;
+	}
+
+	char objbuffer[256];
+	_snprintf(objbuffer, sizeof(objbuffer), "%s@ %s(CThing obj, int id)", Class.c_str(), Class.c_str());
+
+	// Get the factory function from the object type
+	asIScriptFunction* factory = type->GetFactoryByDecl(objbuffer);
+	if (!factory)
+	{
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to get factory for '%s'", Class.c_str());
+		type->Release();
+		ctx->Release();
+		return NULL;
+	}
+
+	// Prepare the context to call the factory function
+	ctx->Prepare(factory);
+
+	ctx->SetArgObject(0, thing);
+	ctx->SetArgDWord(1, id);
+
+	// Execute the call
+	ctx->Execute();
+
+	// Get the object that was created
+	obj = *(asIScriptObject**)ctx->GetAddressOfReturnValue();
+
+	if (obj == NULL)
+	{
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "No script obj was returned from '%s' factory", Class.c_str());
+	}
+
+	// If you're going to store the object you must increase the reference,
+	// otherwise it will be destroyed when the context is reused or destroyed.
+	if (obj)
+		obj->AddRef();
+
+	ctx->Release();
+	factory->Release();
+	type->Release();
+
+	g_AngelScript.AddLog(LOG_OBJ_CONSTRUCT, "Constructed '%s' for '%s'", Class.c_str(), thing->s_ClassId[id]);
+
+	return obj;
+}
+
+void CAngelScriptVM::AddObjToCache(asIScriptObject* obj, CThing* thing)
+{
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		if (m_ASObjs[i].obj == obj &&
+			m_ASObjs[i].thing == thing)
+		{
+			// oops?
+			return;
+		}
+	}
+
+	ASCachedObj_t temp;
+	temp.obj = obj;
+	temp.thing = thing;
+
+	m_ASObjs.push_back(temp);
+}
+
+asIScriptObject* CAngelScriptVM::GetObjFromCache(CThing* thing)
+{
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		if (m_ASObjs[i].thing == thing)
+		{
+			return m_ASObjs[i].obj;
+		}
+	}
+
+	return NULL;
+}
+
+CThing* CAngelScriptVM::GetThingFromCache(asIScriptObject* obj)
+{
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		if (m_ASObjs[i].obj == obj)
+		{
+			return m_ASObjs[i].thing;
+		}
+	}
+
+	return NULL;
+}
+
+bool CAngelScriptVM::RemoveFromCache(asIScriptObject* obj, CThing* thing)
+{
+	//g_AngelScript.AddLog("pre-Destruct for '%s'", thing->s_ClassId[thing->GetClassID()]);
+
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		// Thing might be destroyed
+		if (m_ASObjs[i].obj == obj) /* &&
+			m_ASObjs[i].thing == thing)*/
+		{
+			if (m_ASObjs[i].obj)
+				m_ASObjs[i].obj->Release();
+
+			g_AngelScript.AddLog(LOG_OBJ_DESTRUCT, "Destruct for '%s'", thing->s_ClassId[thing->GetClassID()]);
+
+			m_ASObjs.erase(m_ASObjs.begin()+i);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*
+CRealm* CAngelScriptVM::GetRealm()
+{
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		if (m_ASObjs[i].thing && m_ASObjs[i].thing->m_pRealm)
+		{
+			return m_ASObjs[i].thing->m_pRealm;
+		}
+	}
+
+	return NULL;
+}
+*/

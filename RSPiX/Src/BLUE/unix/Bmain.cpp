@@ -46,6 +46,7 @@
 // Blue //////////////////////////////////////////////////////////////////////
 #include "SDL.h"
 #include "BLUE/Blue.h"
+#include "as_imgui.h"
 
 SDL_Window *sdlWindow = NULL;
 SDL_Renderer* sdlRenderer = NULL; // Made it extern-able - Kizoky
@@ -137,8 +138,7 @@ extern void rspDoSystem(void)										// Returns nothing.
             // If holding down the DELETE button, then make imgui appear - Kizoky
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_DELETE)
             {
-                extern void ShowImgui();
-                ShowImgui();
+                g_ImGui.ToggleShowFlag();
             }
 
             switch (event.type)

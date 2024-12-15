@@ -142,7 +142,7 @@ static void asLog(const std::string& str, ...)
 	_vsnprintf(string, sizeof(string), MSG, argptr);
 	va_end(argptr);
 
-	g_AngelScript.AddLog(string);
+	g_AngelScript.AddLog(LOG_SCRIPT, string);
 }
 
 static void asVarArgs(asIScriptGeneric* gen)

@@ -156,6 +156,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;POSTAL_PLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -274,6 +275,8 @@
     <Image Include="res\teeth.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="angelscript\add_on\contextmgr\contextmgr.h" />
+    <ClInclude Include="angelscript\add_on\debugger\debugger.h" />
     <ClInclude Include="angelscript\add_on\scriptany\scriptany.h" />
     <ClInclude Include="angelscript\add_on\scriptarray\scriptarray.h" />
     <ClInclude Include="angelscript\add_on\scriptbuilder\scriptbuilder.h" />
@@ -282,6 +285,7 @@
     <ClInclude Include="angelscript\add_on\scriptstdstring\scriptstdstring.h" />
     <ClInclude Include="angelscript\add_on\weakref\weakref.h" />
     <ClInclude Include="angelscript\angelscript.h" />
+    <ClInclude Include="angelscript\as_imgui.h" />
     <ClInclude Include="as_main.h" />
     <ClInclude Include="band.h" />
     <ClInclude Include="credits.h" />
@@ -315,6 +319,8 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">RSPiX.H</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release(DebugLog)|Win32'">RSPiX.H</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="angelscript\add_on\contextmgr\contextmgr.cpp" />
+    <ClCompile Include="angelscript\add_on\debugger\debugger.cpp" />
     <ClCompile Include="angelscript\add_on\scriptany\scriptany.cpp" />
     <ClCompile Include="angelscript\add_on\scriptarray\scriptarray.cpp" />
     <ClCompile Include="angelscript\add_on\scriptbuilder\scriptbuilder.cpp" />
@@ -323,6 +329,12 @@
     <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring.cpp" />
     <ClCompile Include="angelscript\add_on\scriptstdstring\scriptstdstring_utils.cpp" />
     <ClCompile Include="angelscript\add_on\weakref\weakref.cpp" />
+    <ClCompile Include="angelscript\as_imgui.cpp" />
+    <ClCompile Include="angelscript\as_register_ccharacter.cpp" />
+    <ClCompile Include="angelscript\as_register_cdoofus.cpp" />
+    <ClCompile Include="angelscript\as_register_cthing.cpp" />
+    <ClCompile Include="angelscript\as_register_cthing3d.cpp" />
+    <ClCompile Include="angelscript\as_register_global.cpp" />
     <ClCompile Include="as_main.cpp" />
     <ClCompile Include="band.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>

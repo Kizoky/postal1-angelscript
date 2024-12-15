@@ -349,105 +349,166 @@ class CListNode
 // Its primary purpose is to force all derived classes to supply a common set
 // of functions so all ojects can be accessed in a generic manner.
 class CThing
-	{
+{
 	// Make CRealm a friend so it can access private stuff
 	friend class CRealm;
 
 	//---------------------------------------------------------------------------
 	// Types, enums, etc.
 	//---------------------------------------------------------------------------
-	public:
+public:
 
-		// Typedefs for static functions that all derived classes should have
-		typedef short (*FuncConstruct)(CRealm* pRealm, CThing** ppNew);
-		typedef short (*FuncPreload)(CRealm* pRealm);
-		typedef short (*FuncDestroy)(void);
+	// Typedefs for static functions that all derived classes should have
+	typedef short (*FuncConstruct)(CRealm* pRealm, CThing** ppNew);
+	typedef short (*FuncPreload)(CRealm* pRealm);
+	typedef short (*FuncDestroy)(void);
 
-		// Struct containing info about derived classes
-		typedef struct
-			{
-			FuncConstruct funcConstruct;						// Construct() function pointer
-			FuncPreload funcPreload;							// Preload() function pointer
-			const char* pszClassName;							// Pointer to class name
-			bool bEditorCreatable;								// true indicates the editor can
-																		// create this object at user 
-																		// request.  false indicates it
-																		// cannot.
-			} ClassInfo;
+	// Struct containing info about derived classes
+	typedef struct
+	{
+		FuncConstruct funcConstruct;						// Construct() function pointer
+		FuncPreload funcPreload;							// Preload() function pointer
+		const char* pszClassName;							// Pointer to class name
+		bool bEditorCreatable;								// true indicates the editor can
+		// create this object at user 
+		// request.  false indicates it
+		// cannot.
+	} ClassInfo;
 
-		// Typedef for class ID's, required because we want specify the type,
-		// whereas the compiler always uses type int for enums.
-		typedef unsigned char ClassIDType;
+	// Typedef for class ID's, required because we want specify the type,
+	// whereas the compiler always uses type int for enums.
+	typedef unsigned char ClassIDType;
 
-		// Class ID's for all derived classes that need to be loaded/saved.  If
-		// these numbers change, it will completely invalidate any world files
-		// that were created prior to the change!  Add new ID's after existing
-		// ID's so the existing ones don't change.
-		typedef enum
-			{
-			// First entry should start at 0!
-			CHoodID = 0,
-			CDudeID,
-			CDoofusID,
-			CTkachukID,
-			CRocketManID,
-			CGrenaderID,
-			CRocketID,
-			CGrenadeID,
-			CBallID,
-			CExplodeID,
-			CBouyID,
-			CNavigationNetID,
-			CGameEditThingID,
-			CNapalmID,
-			CFireID,
-			CImbecileID,
-			CFirebombID,
-			CFirefragID,
-			CAnimThingID,
-			CSoundThingID,
-			CGunnerID,
-			CBandID,
-			CItem3dID,
-			CBarrelID,
-			CProximityMineID,
-			CDispenserID,
-			CFireballID,
-			CCopID,
-			CPistolID,
-			CMachineGunID,
-			CShotGunID,
-			CPersonID,
-			CTimedMineID,
-			CBouncingBettyMineID,
-			CRemoteControlMineID,
-			CPylonID,
-			CPowerUpID,
-			COstrichID,
-			CTriggerID,
-			CHeatseekerID,
-			CChunkID,
-			CAssaultWeaponID,
-			CSentryID,
-			CSentryGunID,
-			CWarpID,
-			CDemonID,
-			CCharacterID,
-			CGoalTimerID,
-			CFlagID,
-			CFlagbaseID,
-			CFirestreamID,
-			CDeathWadID,
-			CDoubleBarrelID,
-			CUziID,
-			CAutoRifleID,
-			CSmallPistolID,
-			CDynamiteID,
-			CSndRelayID,
+	// Class ID's for all derived classes that need to be loaded/saved.  If
+	// these numbers change, it will completely invalidate any world files
+	// that were created prior to the change!  Add new ID's after existing
+	// ID's so the existing ones don't change.
+	typedef enum
+	{
+		// First entry should start at 0!
+		CHoodID = 0,
+		CDudeID,
+		CDoofusID,
+		CTkachukID,
+		CRocketManID,
+		CGrenaderID,
+		CRocketID,
+		CGrenadeID,
+		CBallID,
+		CExplodeID,
+		CBouyID,
+		CNavigationNetID,
+		CGameEditThingID,
+		CNapalmID,
+		CFireID,
+		CImbecileID,
+		CFirebombID,
+		CFirefragID,
+		CAnimThingID,
+		CSoundThingID,
+		CGunnerID,
+		CBandID,
+		CItem3dID,
+		CBarrelID,
+		CProximityMineID,
+		CDispenserID,
+		CFireballID,
+		CCopID,
+		CPistolID,
+		CMachineGunID,
+		CShotGunID,
+		CPersonID,
+		CTimedMineID,
+		CBouncingBettyMineID,
+		CRemoteControlMineID,
+		CPylonID,
+		CPowerUpID,
+		COstrichID,
+		CTriggerID,
+		CHeatseekerID,
+		CChunkID,
+		CAssaultWeaponID,
+		CSentryID,
+		CSentryGunID,
+		CWarpID,
+		CDemonID,
+		CCharacterID,
+		CGoalTimerID,
+		CFlagID,
+		CFlagbaseID,
+		CFirestreamID,
+		CDeathWadID,
+		CDoubleBarrelID,
+		CUziID,
+		CAutoRifleID,
+		CSmallPistolID,
+		CDynamiteID,
+		CSndRelayID,
 
-			// This must be the last entry so it gets set to the total number of ID's
-			TotalIDs
-			};
+		// This must be the last entry so it gets set to the total number of ID's
+		TotalIDs
+	};
+
+	const char* s_ClassId[TotalIDs] = {
+		"CHood",
+		"CDude",
+		"CDoofus",
+		"CTkachuk",
+		"CRocketMan",
+		"CGrenader",
+		"CRocket",
+		"CGrenade",
+		"CBall",
+		"CExplode",
+		"CBouy",
+		"CNavigationNet",
+		"CGameEditThing",
+		"CNapalm",
+		"CFire",
+		"CImbecile",
+		"CFirebomb",
+		"CFirefrag",
+		"CAnimThing",
+		"CSoundThing",
+		"CGunner",
+		"CBand",
+		"CItem3d",
+		"CBarrel",
+		"CProximityMine",
+		"CDispenser",
+		"CFireball",
+		"CCop",
+		"CPistol",
+		"CMachineGun",
+		"CShotGun",
+		"CPerson",
+		"CTimedMine",
+		"CBouncingBettyMine",
+		"CRemoteControlMine",
+		"CPylon",
+		"CPowerUp",
+		"COstrich",
+		"CTrigger",
+		"CHeatseeker",
+		"CChunk",
+		"CAssaultWeapon",
+		"CSentry",
+		"CSentryGun",
+		"CWarp",
+		"CDemon",
+		"CCharacter",
+		"CGoalTimer",
+		"CFlag",
+		"CFlagbase",
+		"CFirestream",
+		"CDeathWad",
+		"CDoubleBarrel",
+		"CUzi",
+		"CAutoRifle",
+		"CSmallPistol",
+		"CDynamite",
+		"CSndRelay",
+	};
 
 		typedef enum	// Macros within CThing namespace.
 			{
