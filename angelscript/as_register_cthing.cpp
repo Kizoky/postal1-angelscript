@@ -3,5 +3,5 @@
 
 void CAngelScriptVM::RegisterCThing(int& r)
 {
-	r = engine->RegisterObjectType("CThing", sizeof(CThing), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<CThing>()); DumpObjectType(r, POSTAL_CTHING);
+	AS_REGISTER_OBJ("CThing", CThing, POSTAL_CTHING);
 }

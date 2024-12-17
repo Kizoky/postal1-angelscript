@@ -4,5 +4,5 @@
 
 void CAngelScriptVM::RegisterCDoofus(int& r)
 {
-	r = engine->RegisterObjectType("CDoofus", sizeof(CDoofus), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<CDoofus>()); DumpObjectType(r, POSTAL_CDOOFUS);
+	AS_REGISTER_OBJ("CDoofus", CDoofus, POSTAL_CDOOFUS);
 }

@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include "realm.h"
+
 CAngelScriptVM g_AngelScript(true);
 
 CContextMgr* g_ctxMgr = 0;
@@ -194,17 +196,17 @@ void CAngelScriptVM::AddLog(int logType, const char* str, ...)
 // Implement a simple message callback function
 void MessageCallback(const asSMessageInfo* msg, void* param)
 {
-	const char* type = "ERR";
+	const char* type = "[error]";
 	if (msg->type == asMSGTYPE_WARNING)
 	{
-		type = "WARN";
+		type = "[warning]";
 	}
 	else if (msg->type == asMSGTYPE_INFORMATION)
 	{
-		type = "INFO";
+		type = "[info]";
 	}
 
-	g_AngelScript.AddLog(LOG_CALLBACK, "%s (L: %d) : %s : %s", msg->section, msg->row, type, msg->message);
+	g_AngelScript.AddLog(LOG_CALLBACK, "%s%s (L: %d) : %s", type, msg->section, msg->row, msg->message);
 }
 
 // 1 == success
@@ -212,7 +214,7 @@ void MessageCallback(const asSMessageInfo* msg, void* param)
 // -1 == catastrophic
 int CAngelScriptVM::Setup(bool bRecompile)
 {
-	g_AngelScript.AddLog(LOG_MAIN, "Setting up AngelScript %s", ANGELSCRIPT_VERSION_STRING);
+	g_AngelScript.AddLog(LOG_MAIN, "[info] Setting up AngelScript %s", ANGELSCRIPT_VERSION_STRING);
 
 	int r = 0;
 
@@ -252,6 +254,10 @@ int CAngelScriptVM::Setup(bool bRecompile)
 
 		RegisterCDoofus(r);
 
+		RegisterCDude(r);
+
+		RegisterCast(r);
+
 		// This has to be the last
 		RegisterGlobal(r);
 
@@ -270,7 +276,7 @@ int CAngelScriptVM::Setup(bool bRecompile)
 		r = builder.AddSectionFromFile(g_loaderPath.c_str());
 	else
 	{
-		g_AngelScript.AddLog(LOG_COMPILE, "Invalid/missing path for loader: '%s'", g_loaderPath.c_str());
+		g_AngelScript.AddLog(LOG_COMPILE, "[error] Invalid/missing path for loader: '%s'", g_loaderPath.c_str());
 		return 0;
 	}
 
@@ -279,19 +285,19 @@ int CAngelScriptVM::Setup(bool bRecompile)
 		r = builder.BuildModule();
 		if (r >= 0)
 		{
-			g_AngelScript.AddLog(LOG_COMPILE, "Successfully built module for '%s'", g_loaderPath.c_str());
+			g_AngelScript.AddLog(LOG_COMPILE, "[info] Successfully built module for '%s'", g_loaderPath.c_str());
 			return 1;
 		}
 		else
 		{
-			g_AngelScript.AddLog(LOG_COMPILE, "There were errors in building for '%s'", g_loaderPath.c_str());
+			g_AngelScript.AddLog(LOG_COMPILE, "[error] There were errors in building for '%s'", g_loaderPath.c_str());
 			return 0;
 		}
 	}
 	else
 	{
 		// does it even reach here? Probably not
-		g_AngelScript.AddLog(LOG_COMPILE, "There were errors in building...");
+		g_AngelScript.AddLog(LOG_COMPILE, "[error] There were errors in building...");
 		return 0;
 	}
 
@@ -320,14 +326,14 @@ asIScriptObject* CAngelScriptVM::CreateObj(std::string Class, CThing* thing, int
 	asIScriptContext* ctx = g_AngelScript.GetEngine()->CreateContext();
 	if (ctx == NULL)
 	{
-		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to create context for '%s'", Class.c_str());
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "[error] Failed to create context for '%s'", Class.c_str());
 		return NULL;
 	}
 
 	asITypeInfo* type = g_AngelScript.GetModule()->GetTypeInfoByDecl(Class.c_str());
 	if (type == NULL)
 	{
-		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to get type for '%s'", Class.c_str());
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "[error] Failed to get type for '%s'", Class.c_str());
 		ctx->Release();
 		return NULL;
 	}
@@ -339,7 +345,7 @@ asIScriptObject* CAngelScriptVM::CreateObj(std::string Class, CThing* thing, int
 	asIScriptFunction* factory = type->GetFactoryByDecl(objbuffer);
 	if (!factory)
 	{
-		g_AngelScript.AddLog(LOG_OBJ_FAIL, "Failed to get factory for '%s'", Class.c_str());
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "[error] Failed to get factory for '%s'", Class.c_str());
 		type->Release();
 		ctx->Release();
 		return NULL;
@@ -359,7 +365,7 @@ asIScriptObject* CAngelScriptVM::CreateObj(std::string Class, CThing* thing, int
 
 	if (obj == NULL)
 	{
-		g_AngelScript.AddLog(LOG_OBJ_FAIL, "No script obj was returned from '%s' factory", Class.c_str());
+		g_AngelScript.AddLog(LOG_OBJ_FAIL, "[warning] No script obj was returned from '%s' factory", Class.c_str());
 	}
 
 	// If you're going to store the object you must increase the reference,
@@ -371,7 +377,7 @@ asIScriptObject* CAngelScriptVM::CreateObj(std::string Class, CThing* thing, int
 	factory->Release();
 	type->Release();
 
-	g_AngelScript.AddLog(LOG_OBJ_CONSTRUCT, "Constructed '%s' for '%s'", Class.c_str(), thing->s_ClassId[id]);
+	g_AngelScript.AddLog(LOG_OBJ_CONSTRUCT, "[info] Constructed '%s' for '%s'", Class.c_str(), thing->s_ClassId[id]);
 
 	return obj;
 }
@@ -434,7 +440,7 @@ bool CAngelScriptVM::RemoveFromCache(asIScriptObject* obj, CThing* thing)
 			if (m_ASObjs[i].obj)
 				m_ASObjs[i].obj->Release();
 
-			g_AngelScript.AddLog(LOG_OBJ_DESTRUCT, "Destruct for '%s'", thing->s_ClassId[thing->GetClassID()]);
+			g_AngelScript.AddLog(LOG_OBJ_DESTRUCT, "[info] Destruct for '%s'", thing->s_ClassId[thing->GetClassID()]);
 
 			m_ASObjs.erase(m_ASObjs.begin()+i);
 			return true;
@@ -444,17 +450,47 @@ bool CAngelScriptVM::RemoveFromCache(asIScriptObject* obj, CThing* thing)
 	return false;
 }
 
-/*
 CRealm* CAngelScriptVM::GetRealm()
 {
+	static CRealm* pRealm = NULL;
+	if (pRealm)
+		return pRealm;
+
 	for (int i = 0; i < m_ASObjs.size(); i++)
 	{
 		if (m_ASObjs[i].thing && m_ASObjs[i].thing->m_pRealm)
 		{
-			return m_ASObjs[i].thing->m_pRealm;
+			pRealm = m_ASObjs[i].thing->m_pRealm;
+			return pRealm;
 		}
 	}
 
-	return NULL;
+	return pRealm;
 }
-*/
+
+// very likely not multiplayer friendly
+// but who would be crazy to play MP in 2024?
+CDude* CAngelScriptVM::GetPlayer()
+{
+	static CDude* pPlayer = NULL;
+	if (pPlayer)
+		return pPlayer;
+
+	for (int i = 0; i < m_ASObjs.size(); i++)
+	{
+		if (m_ASObjs[i].thing)
+		{
+			if (m_ASObjs[i].thing->GetClassID() == CThing::CDudeID)
+			{
+				pPlayer = (CDude*)m_ASObjs[i].thing;
+				return pPlayer;
+			}
+		}
+	}
+
+	// TODO: find out why CDude gets destructed when dead, and why grabbing from
+	// our cached array does not work, but from here it does hmmmmm
+	pPlayer = (CDude*)GetRealm()->m_aclassHeads[CThing::CDudeID].GetNext();
+
+	return pPlayer;
+}

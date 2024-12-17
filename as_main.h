@@ -8,7 +8,6 @@
 #include "assert.h"
 
 #include "thing.h"
-//#include "realm.h"
 
 // Only for dumping information!
 
@@ -90,7 +89,9 @@ enum
 	LOG_OBJ_FAIL
 };
 
-//class CRealm;
+// Make the compiler not shriek
+class CRealm;
+class CDude;
 
 class CAngelScriptVM
 {
@@ -103,6 +104,10 @@ public:
 	// Global functions
 	void RegisterGlobal(int& r);
 
+	// Register casting
+	// i.e. from CThing to CDude and vice versa...
+	void RegisterCast(int& r);
+
 	// Every object from the game is derived from CThing
 	// this seems to be simple enough to grab pointers
 	void RegisterCThing(int& r);
@@ -114,6 +119,8 @@ public:
 	void RegisterCCharacter(int& r);
 
 	void RegisterCDoofus(int& r);
+
+	void RegisterCDude(int& r);
 public:
 	asIScriptEngine* GetEngine() { return engine; }
 	asIScriptModule* GetModule() { return mod; }
@@ -127,7 +134,10 @@ public:
 	CThing* GetThingFromCache(asIScriptObject* obj);
 	bool RemoveFromCache(asIScriptObject* obj, CThing* thing);
 
-	//CRealm* GetRealm();
+	CRealm* GetRealm();
+
+	// maybe this isn't a good idea under multiplayer
+	CDude* GetPlayer();
 private:
 	asIScriptEngine* engine;
 	asIScriptModule* mod;
@@ -182,7 +192,7 @@ extern std::string g_loaderPath;
 // Registers an object. Normally in Script this will be name@
 // Recommended to use this macro if object won't be a variable like Vector, QAngle, etc..
 #define AS_REGISTER_OBJ( name, objclass, identifier ) \
-	r = engine->RegisterObjectType(name, sizeof(objclass), asOBJ_REF | asOBJ_NOCOUNT); assert(r >= 0); DumpObjectType(r, identifier);
+	r = engine->RegisterObjectType(name, sizeof(objclass), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<objclass>() ); assert(r >= 0); DumpObjectType(r, identifier);
 // Singleton registration
 #define AS_REGISTER_OBJ_S( name ) \
 	r = engine->RegisterObjectType(name, 0, asOBJ_REF | asOBJ_NOHANDLE); assert(r >= 0); DumpObjectType(r);

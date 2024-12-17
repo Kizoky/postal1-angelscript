@@ -125,6 +125,9 @@
     <ClCompile Include="angelscript\as_register_cdoofus.cpp" />
     <ClCompile Include="angelscript\as_register_global.cpp" />
     <ClCompile Include="angelscript\as_imgui.cpp" />
+    <ClCompile Include="angelscript\as_register_cdude.cpp" />
+    <ClCompile Include="angelscript\as_register_cast.cpp" />
+    <ClCompile Include="angelscript\as_imgui_console.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Postal Plus.txt" />
